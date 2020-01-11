@@ -8,8 +8,8 @@ int main(int argc, char **argv)
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_RGB | GLUT_DEPTH | GLUT_DOUBLE);
 
-    glutInitWindowSize(1000, 800);
-    glutInitWindowPosition(300, 100);
+    glutInitWindowSize(700, 900);
+    glutInitWindowPosition(500, 50);
     glutCreateWindow(argv[0]);
 
     glutKeyboardFunc(on_keyboard);
@@ -18,6 +18,7 @@ int main(int argc, char **argv)
 
     glClearColor(0.75, 0.75, 0.75, 0);
     glEnable(GL_DEPTH_TEST);
+    glEnable(GL_NORMALIZE);
     glLineWidth(3);
     
     glEnable(GL_LIGHTING);
