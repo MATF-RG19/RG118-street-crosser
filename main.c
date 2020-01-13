@@ -16,7 +16,7 @@ int main(int argc, char **argv)
     glutReshapeFunc(on_reshape);
     glutDisplayFunc(on_display);
 
-    glClearColor(0.75, 0.75, 0.75, 0);
+    glClearColor(0, 0, 0, 0);
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_NORMALIZE);
     glLineWidth(3);

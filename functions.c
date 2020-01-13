@@ -12,12 +12,17 @@ float camera_par = 0;
 float translate_par = 0;
 float rotation_parameter = 0;
 float curr_rotation = 2;
+float car_par = -16;
+float car_par1 = 7;
+int count = 0;
 float z = 3;
 int tmp = 0;
 int tmp_par = 0;
+int tmp_rot = 0;
 int scale_par = 0;
 int niz[ROAD_LENGTH];
 int animation_ongoing = 0;
+float water_par = 0;
 
 void on_keyboard(unsigned char key, int x, int y)
 {
@@ -27,48 +32,58 @@ void on_keyboard(unsigned char key, int x, int y)
         break;
     case 'w':
 		/*animation_parameter += 0.75;*/
-		if (!animation_ongoing) {
-            animation_ongoing = 1;
-            tmp_par = 0;
-            scale_par = 0;
-            translate_par = 0;
-            rotation_parameter = 1;
-            glutTimerFunc(TIMER_INTERVAL, on_timer, 0);
-        }
+		if(z_parameter < 149.997087){
+			if (!animation_ongoing) {
+			 	
+				animation_ongoing = 1;
+				tmp_par = 0;
+				scale_par = 0;
+				translate_par = 0;
+				rotation_parameter = 1;
+				glutTimerFunc(TIMER_INTERVAL, on_timer, 0);
+			   	
+			}	
+		}
         glutPostRedisplay();
 		break;
 	 case 's':
 	 	if(z_parameter > -0.01){
 			if (!animation_ongoing) {
+				
 		        animation_ongoing = 1;
 		        tmp_par = 0;
 		        scale_par = 0;
 		        translate_par = 0;
 		        rotation_parameter = 3;
 		        glutTimerFunc(TIMER_INTERVAL, on_timer, 1);
+		        
 		    }
 		}
 		glutPostRedisplay();
 		break;
 	case 'd':
 			if (!animation_ongoing) {
+				
 		        animation_ongoing = 1;
 		        tmp_par = 0;
 		        scale_par = 0;
 		        translate_par = 0;
 		        rotation_parameter = 2;
 		        glutTimerFunc(TIMER_INTERVAL, on_timer_x, 0);
+		        
 		    }
 		glutPostRedisplay();
 		break;
 	case 'a':
 			if (!animation_ongoing) {
+				
 		        animation_ongoing = 1;
 		        tmp_par = 0;
 		        scale_par = 0;
 		        translate_par = 0;
 		        rotation_parameter = 4;
 		        glutTimerFunc(TIMER_INTERVAL, on_timer_x, 1);
+		        
 		    }
 		glutPostRedisplay();
 		break;
@@ -86,29 +101,30 @@ void on_keyboard(unsigned char key, int x, int y)
 
 static void on_timer(int id)
 {
-	if(id == 0 && tmp_par >= 25){
-    	z_parameter += 0.06;
-    	
-    }
-    if(id == 1 && tmp_par >= 25){
-    	z_parameter -= 0.06;
+	if(id == 0 && tmp_par >= 15){
+    	z_parameter += 0.075;
     }
     
-    if(tmp_par >= 20){
-    	translate_par += 1;
+    if(id == 1 && tmp_par >= 15){
+    	z_parameter -= 0.075;
+    }
+    
+    if(tmp_par >= 14){
+    	translate_par += 1.42857143;
     }
     
     if(id == 0 || id == 1){
     	tmp_par += 1;
-		scale_par += 2;
+		scale_par += 2.85714286;
     }
 	
-	if(scale_par >= 50){
-		scale_par = 50;
+	if(scale_par >= 35){
+		scale_par = 35;
 	}
 	
-	if(tmp_par == 50){
-		animation_ongoing = 0;
+	if(tmp_par == 35){
+		animation_ongoing = 0; 
+		curr_rotation = rotation_parameter;
 	}
 
     glutPostRedisplay();
@@ -116,34 +132,36 @@ static void on_timer(int id)
     if (animation_ongoing) {
         glutTimerFunc(TIMER_INTERVAL, on_timer, id);
     }
+    
 }
 
 static void on_timer_x(int id)
 {
     
-    if(id == 0 && tmp_par >= 25 && x_parameter < 4.5){
-    	x_parameter += 0.06;
+    if(id == 0 && tmp_par >= 15 && x_parameter < 4.5){
+    	x_parameter += 0.075;
     }
     
-    if(id == 1 && tmp_par >= 25 && x_parameter > -3){
-    	x_parameter -= 0.06;
+    if(id == 1 && tmp_par >= 15 && x_parameter > -3){
+    	x_parameter -= 0.075;
     }
     
-    if(tmp_par >= 20){
-    	translate_par += 1;
+    if(tmp_par >= 14){
+    	translate_par += 1.42857143;
     }
     
     if(id == 0 || id == 1){
     	tmp_par += 1;
-		scale_par += 2;
+		scale_par += 2.85714286;
     }
 	
-	if(scale_par >= 50){
-		scale_par = 50;
+	if(scale_par >= 35){
+		scale_par = 35;
 	}
 	
-	if(tmp_par == 50){
+	if(tmp_par == 35){
 		animation_ongoing = 0;
+		curr_rotation = rotation_parameter; 
 	}
 
     glutPostRedisplay();
@@ -151,6 +169,25 @@ static void on_timer_x(int id)
     if (animation_ongoing) {
         glutTimerFunc(TIMER_INTERVAL, on_timer_x, id);
     }
+}
+
+static void on_timer_car(int id){
+	if(id == 0){
+		car_par += 0.09;
+		car_par1 += 0.07;
+		water_par += 0.01;
+	}
+
+	if((int)car_par == 7){
+		car_par = -10;
+	}
+	
+	if((int)car_par1 == 10){
+		car_par1 = -7;
+	}
+	
+	glutPostRedisplay();
+
 }
 
 void on_reshape(int width, int height)
@@ -177,14 +214,17 @@ void on_display(void)
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     gluLookAt(
-            1, 10-camera_par, 5-z_parameter,  /*0.5 2 3*/
-            0, 0, -4-z_parameter,
+            1+0.4, 7, 5-z_parameter,  /*0.5 2 3*/
+            -2+0.4, 0, -4-z_parameter,
             0, 1, 0
         );
         
-    srand(time(NULL));
+    glutTimerFunc(TIMER_INTERVAL, on_timer_car, 0);
+
+    
     
     z = 4.5;
+    
     
     draw_break();
 	draw_break();
@@ -194,24 +234,6 @@ void on_display(void)
    	determine_obstacle_layout();
    	
    	glPushMatrix();
-    	
-    	glTranslatef(0,0+sin(PI*translate_par/30),0);
-    	glTranslatef(0+x_parameter,0.8-0.35*sin(PI*scale_par/50),1.5-z_parameter);
- 
-    		if(rotation_parameter != curr_rotation){
-    			if((rotation_parameter == 1 && curr_rotation == 4) || (rotation_parameter == 4 && curr_rotation == 3) ||
-    			   (rotation_parameter == 3 && curr_rotation == 2) || (rotation_parameter == 2 && curr_rotation == 1))
-    			   glRotatef(-90, 0, 1, 0);
-    			else if((rotation_parameter == 2 && curr_rotation == 4) || (rotation_parameter == 1 && curr_rotation == 3) ||
-    			   (rotation_parameter == 4 && curr_rotation == 2) || (rotation_parameter == 3 && curr_rotation == 1))
-    			   glRotatef(180, 0, 1, 0);
-    			else if((rotation_parameter == 3 && curr_rotation == 4) || (rotation_parameter == 2 && curr_rotation == 3) ||
-    			   (rotation_parameter == 1 && curr_rotation == 2) || (rotation_parameter == 4 && curr_rotation == 1))
-    			   glRotatef(90, 0, 1, 0);
-    		}
-    		
-
-    	glScalef(0.7, 0.7-0.35*sin(PI*scale_par/50), 0.65+0.15*sin(PI*scale_par/50));
     	draw_character();
 	glPopMatrix();
     
@@ -221,7 +243,7 @@ void on_display(void)
 
 void determine_obstacle_layout(){
 	int i;
-    
+    srand(time(NULL));    
     if(tmp == 0){
     	for(i = 0; i < ROAD_LENGTH; i++){
     		niz[i] = rand()%3;
@@ -244,29 +266,53 @@ void determine_obstacle_layout(){
     				niz[i] = 0;
     		if(niz[i-1] == 1 && niz[i] == 2)
     				niz[i] = rand()%2;
+    		if((niz[i-1] == 2 || niz[i-2] == 2 ||
+    			niz[i-1] == 3 || niz[i-4] == 2) && niz[i] == 2)
+    				niz[i] = rand()%2;
     		
     	}
-    	niz[ROAD_LENGTH-1] = 0;	
+    	niz[ROAD_LENGTH-1] = 0;
    	}
    	tmp++;
     
+    
     for(i = 0; i < ROAD_LENGTH; i++){
-    	
     	if(niz[i] == 0)
     		draw_break();
-    	else if(niz[i] == 1)
-    		draw_road();
+    	else if(niz[i] == 1){
+    		if(i%2 == 1){
+    			if(i%4==1)
+    				draw_road_d1();
+    			else
+    				draw_road_d2();
+    		}
+    		else{
+    			if(i%4==0)
+    				draw_road_l1(niz[i-1], niz[i+1]);
+    			else
+    				draw_road_l2(niz[i-1], niz[i+1]);
+    			
+    		}	
+    	}
     	else
     		draw_water();
     }
 }
 
-void draw_road(){
+void draw_road_d1(){
 
 	glPushMatrix();
 		glColor3f (0.2, 0.2, 0.2);
 		glTranslatef(0, 0, z);
 		glScalef(30, 0.2, 1.5);
+		glutSolidCube(1);
+	glPopMatrix();
+	
+	
+	glPushMatrix();
+		glColor3f(0.36, 0.2, 0.09);
+		glTranslatef(car_par, 0.1, z);
+		glScalef(3, 0.2, 0.75);
 		glutSolidCube(1);
 	glPopMatrix();
 	
@@ -283,7 +329,77 @@ void draw_road(){
 	z -= 1.5;
 }
 
+void draw_road_l1(int x, int y){
+
+	glPushMatrix();
+		if(x != 1 && x == y)
+			glColor3f (0.2, 0.2, 0.2);
+		else
+			glColor3f (0.25, 0.25, 0.25);
+		glTranslatef(0, 0, z);
+		glScalef(30, 0.2, 1.5);
+		glutSolidCube(1);
+	glPopMatrix();
+	
+	
+	glPushMatrix();
+		glColor3f(0.36, 0.2, 0.09);
+		glTranslatef(-car_par1, 0.1, z);
+		glScalef(3, 0.2, 0.75);
+		glutSolidCube(1);
+	glPopMatrix();
+	
+	
+	z -= 1.5;
+}
+
+void draw_road_d2(){
+
+	glPushMatrix();
+		glColor3f (0.2, 0.2, 0.2);
+		glTranslatef(0, 0, z);
+		glScalef(30, 0.2, 1.5);
+		glutSolidCube(1);
+	glPopMatrix();
+	
+	
+	glPushMatrix();
+		glColor3f(0.36, 0.2, 0.09);
+		glTranslatef(1*car_par, 0.1, z);
+		glScalef(3, 0.2, 0.75);
+		glutSolidCube(1);
+	glPopMatrix();
+	
+	
+	z -= 1.5;
+}
+
+void draw_road_l2(int x, int y){
+
+	glPushMatrix();
+		if(x != 1 && x == y)
+			glColor3f (0.2, 0.2, 0.2);
+		else
+			glColor3f (0.25, 0.25, 0.25);
+		glTranslatef(0, 0, z);
+		glScalef(30, 0.2, 1.5);
+		glutSolidCube(1);
+	glPopMatrix();
+	
+	
+	glPushMatrix();
+		glColor3f(0.36, 0.2, 0.09);
+		glTranslatef(-car_par1, 0.1, z);
+		glScalef(3, 0.2, 0.75);
+		glutSolidCube(1);
+	glPopMatrix();
+	
+	
+	z -= 1.5;
+}
+
 void draw_break(){
+	srand(z);
 	
 	glPushMatrix();
 		glColor3f (0.2, 0.6, 0.2);
@@ -291,7 +407,29 @@ void draw_break(){
 		glScalef(30, 0.2, 1.5);
 		glutSolidCube(1);
 	glPopMatrix();
-
+	
+	float array[8] = {-7.5, -6, -4.5, -3, -1.5, 1.5, 3, 4.5};
+	
+	int i = 0;
+	
+	for(i = 0; i < 8; i++){
+		if(rand()%2 == 1){
+			glPushMatrix();
+				glTranslatef(array[i], 0.6, z);
+				int r = rand()%3;
+				if(r == 1)
+					draw_tree_1();
+				else if(r == 2)
+					draw_tree_2();
+				else{
+					glScalef(0.8, 0.7, 0.8);	
+					draw_stone();
+				}
+			glPopMatrix();
+		}
+	}
+	
+	
 	
 	z -= 1.5;
 }
@@ -304,6 +442,13 @@ void draw_water(){
 		glScalef(30, 0.2, 1.5);
 		glutSolidCube(1);
 	glPopMatrix();
+	
+	glPushMatrix();
+		glColor3f(0.36, 0.2, 0.09);
+		glTranslatef(-3.5*sin(water_par), 0.1, z);
+		glScalef(3, 0.2, 0.75);
+		glutSolidCube(1);
+	glPopMatrix();
 
 	
 	z -= 1.5;
@@ -311,6 +456,60 @@ void draw_water(){
 }
 
 void draw_character(){
+
+	glPushMatrix();
+	glTranslatef(0,0+sin(PI*translate_par/30),0);
+    glTranslatef(0+x_parameter,0.8-0.35*sin(PI*scale_par/35),1.5-z_parameter);
+ 			
+    		if(rotation_parameter != curr_rotation){
+    			if(curr_rotation == 1)
+    				glRotatef(90, 0, 1, 0);
+    			if(curr_rotation == 3)
+    				glRotatef(-90, 0, 1, 0);
+    			if(curr_rotation == 4)
+    				glRotatef(180, 0, 1, 0);
+    			if((rotation_parameter == 1 && curr_rotation == 4) || 
+    			   (rotation_parameter == 4 && curr_rotation == 3) ||
+    			   (rotation_parameter == 3 && curr_rotation == 2) || 
+    			   (rotation_parameter == 2 && curr_rotation == 1)){
+    			   
+    			    glRotatef(-90*tmp_par/35, 0, 1, 0);
+    			    
+    			   	
+    			}
+    			if((rotation_parameter == 1 && curr_rotation == 3) ||
+    			   (rotation_parameter == 4 && curr_rotation == 2) || 
+    			   (rotation_parameter == 3 && curr_rotation == 1)){
+    			   	
+    			    glRotatef(180*tmp_par/35, 0, 1, 0);
+    			    
+					
+    			}
+    			
+    			if(rotation_parameter == 2 && curr_rotation == 4){
+    				glRotatef(-180*tmp_par/35, 0, 1, 0);
+    			}
+    			
+    			if((rotation_parameter == 3 && curr_rotation == 4) || 
+    			   (rotation_parameter == 2 && curr_rotation == 3) ||
+    			   (rotation_parameter == 1 && curr_rotation == 2) || 
+    			   (rotation_parameter == 4 && curr_rotation == 1)){
+    			   	
+    			   	glRotatef(90*tmp_par/35, 0, 1, 0);
+    			   	
+    			}
+    		}
+
+		else{
+			if(curr_rotation == 1)
+    				glRotatef(90, 0, 1, 0);
+    		if(curr_rotation == 3)
+    				glRotatef(-90, 0, 1, 0);
+    		if(curr_rotation == 4)
+    				glRotatef(180	, 0, 1, 0);
+		
+		}
+    	glScalef(0.7, 0.7-0.35*sin(PI*scale_par/35), 0.75+0.15*sin(PI*scale_par/35));
 
 	glPushMatrix(); /*telo*/
 		glColor3f(0,0,0);
@@ -442,7 +641,7 @@ void draw_character(){
 		glutSolidCube(1);
 	glPopMatrix();*/
 
-
+	glPopMatrix();
 
 }
 
@@ -466,6 +665,64 @@ void draw_leg(){
 		glutSolidCube(1);
 	glPopMatrix();
 
+}
+
+void draw_tree_1(){
+
+	glPushMatrix();
+    	glColor3f(0.32, 0.44, 0.21);
+		glTranslatef(0, 0.5-0.2 + 0.19, 0);
+		glScalef(1 - 0.26, 1 - 0.4 + 0.37, 1 - 0.26); 
+    	glutSolidCube(1);
+  	glPopMatrix();
+  	glPushMatrix();
+  		glColor3f(0.36, 0.2, 0.09);
+		glTranslatef( 0, -0.24, 0);
+		glScalef(1 - 0.62, 1 - 0.52, 1 - 0.59);
+		glutSolidCube(1);
+	glPopMatrix();
+
+}
+
+void draw_tree_2(){
+
+	glPushMatrix();
+    	glColor3f(0.32, 0.44, 0.21);
+		glTranslatef(0, 0.5-0.2-0.2 + 0.19, 0);
+		glScalef(1 - 0.26, 1 - 0.4 + 0.37-0.1-0.3, 1 - 0.26); 
+    	glutSolidCube(1);
+  	glPopMatrix();
+  	glPushMatrix();
+  		glColor3f(0.36, 0.2, 0.09);
+		glTranslatef( 0, -0.24, 0);
+		glScalef(1 - 0.62, 1 - 0.52, 1 - 0.59);
+		glutSolidCube(1);
+	glPopMatrix();
+
+}
+
+void draw_stone(){
+
+	glPushMatrix();
+    	glColor3f(0.4, 0.4, 0.4);
+		glTranslatef( 0, 0, 0);
+		glScalef(1 - 0.1, 1 - 0.25, 1 - 0.1);
+    	glutSolidCube(1);
+  	glPopMatrix();
+  	glPushMatrix();
+  		glColor3f(0.4, 0.4, 0.4);
+		glTranslatef( -0.07 - 0.09, -0.09, 0.08);
+		glScalef(1 + 0.05 - 0.2, 1 -0.43, 1 + 0.04);
+		glutSolidCube(1);
+	glPopMatrix();
+	glPushMatrix();
+  		glColor3f(0.4, 0.4, 0.4);
+		glTranslatef( -0.17, 0.43, 0);
+		glScalef(1 - 0.43, 1 - 0.879999, 1 - 0.71);
+		glutSolidCube(1);
+	glPopMatrix();
+	
+		
 
 }
 
