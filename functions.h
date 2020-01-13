@@ -26,6 +26,7 @@ void draw_leg();
 void draw_tree_1();
 void draw_tree_2();
 void draw_stone();
+void draw_car();
 
 
 #endif
