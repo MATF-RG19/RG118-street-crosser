@@ -12,7 +12,7 @@ double translate_par = 0;		/*animacija skoka*/
 int scale_par = 0;				/*animacija skoka*/
 double rotation_parameter = 0;	/*animacija rotacije karaktera*/
 double curr_rotation = 2;		/*animacija rotacije karaktera*/
-double car_par = -16;			/*kretanje automobila vecom brzinom*/
+double car_par = -10;			/*kretanje automobila vecom brzinom*/
 double car_par1 = 8;			/*kretanje automobila sa manjom brzinom*/
 double sink_par = 0;			
 double z = 4.5;					/*za iscrtavanje prepreka i odmaralista*/
@@ -220,17 +220,17 @@ static void on_timer_x(int id)
 
 static void on_timer_car(int id){
 	if(id == 0){
-		car_par += 0.09;
-		car_par1 += 0.07;
+		car_par += 0.1;
+		car_par1 += 0.08;
 		island_par += 0.01;
 	}
 
-	if((int)car_par == 7){
+	if((int)car_par == 9){
 		car_par = -10;
 	}
 	
 	if((int)car_par1 == 10){
-		car_par1 = -7;
+		car_par1 = -9;
 	}
 	
 	glutPostRedisplay();
@@ -532,7 +532,6 @@ void draw_water(){
 void draw_character(){
 
 	glPushMatrix();
-	int tmp = (int)(z_parameter/1.5);
 	if(obstacle[count1-1][0] == 2 
 		&& (x_parameter >= -3.5*sin(island_par)-1
 	    && x_parameter <= -3.5*sin(island_par)+1)){
@@ -824,9 +823,17 @@ void draw_car(int road){
 	glPopMatrix();
 	
 	glPushMatrix(); /*karoserija*/
-		glColor3f(0.6,0.6,0);
+		if(road == 0)
+			glColor3f(0.6,0.6,0);
+		else if(road == 1)
+			glColor3f(0,0,0.6);
+		else if(road == 2)
+			glColor3f(0,0.6,0);
+		else
+			glColor3f(0.4,0,0.6);
 		glTranslatef( 0, 0.21, 0);
 		glScalef(2, 0.2 + 0.14, 1);
+		
 		glutSolidCube(1);
 	glPopMatrix();
 
@@ -862,7 +869,14 @@ void draw_car(int road){
 	glPopMatrix();
 	
 	glPushMatrix(); /*traka*/
-		glColor3f(0.5,0.5,0);
+		if(road == 0)
+			glColor3f(0.5,0.5,0);
+		else if(road == 1)
+			glColor3f(0,0,0.45);
+		else if(road == 2)
+			glColor3f(0,0.45,0);
+		else
+			glColor3f(0.3,0,0.5);
 		glTranslatef( 0, 0.21, 0 - 0.01);
 		glScalef(2 + 0.01, 0.2 + 0.14 + 0.01, 1 - 0.7);
 		
