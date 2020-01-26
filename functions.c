@@ -6,7 +6,7 @@
 
 static int window_width = 0;
 static int window_height = 0;
-double z_parameter = 1.5;			/*kretanje karaktera i kamere unapred*/
+double z_parameter = 1.5;		/*kretanje karaktera i kamere unapred*/
 double x_parameter = 0;			/*kretanje karaktera levo-desno*/
 double translate_par = 0;		/*animacija skoka*/
 int scale_par = 0;				/*animacija skoka*/
@@ -16,19 +16,20 @@ double car_par = -10;			/*kretanje automobila vecom brzinom*/
 double car_par1 = 8;			/*kretanje automobila sa manjom brzinom*/
 double sink_par = 0;			/*animacija utapanja*/
 double z = 4.5;					/*za iscrtavanje prepreka i odmaralista*/
-int start_of_program = 0;		/*provera da li je prvo pokretanje programa*/			
 int animation_par = 0;			/*glavni parametar skoka i pomeraja karaktera*/
 int animation_ongoing = 0;		/*provera da li je animacija u toku*/
 double island_par = 0;			/*animacija kretanja ostrvca na vodi*/
 int check = 0;					/*za proveru postojanja prepreke*/
 int count = 1;					/*brojac koliko je karakter otisao unapred*/
-int count1 = 1;					/*kao count samo se uvecava po zavrsetku animacije 
+int count1 = 1;					/*kao count samo se uvecava po zavrsetku animacije
 								  zbog provere da li je karakter skocio u vodu*/
 int count_x = 5;				/*brojac koliko je karakter otisao levo-desno*/
+int start_of_game = 0;			/*provera da li je prvo pokretanje igrice*/
+int end_of_game = 0;			/*signal za kraj igrice*/
 double obstacle[150][9];		/*sadrzi raspored drveca i kamenja*/
 int terrain[ROAD_LENGTH];		/*niz koji sadrzi raspored puteva, vode, 	
 								  odmaralista*/
-
+double par = 0;
 void on_keyboard(unsigned char key, int x, int y)
 {
 	int i,j;
@@ -37,8 +38,9 @@ void on_keyboard(unsigned char key, int x, int y)
         exit(0);
         break;
     case 'w':
+    case 'W':
     
-		if(z_parameter < 149.997087){
+		if(z_parameter < 149.997087 && end_of_game == 0){
 			if (!animation_ongoing) {
 			 	
 			 	check = obstacle_check('w');
@@ -56,7 +58,9 @@ void on_keyboard(unsigned char key, int x, int y)
         glutPostRedisplay();
 		break;
 	 case 's':
-	 	if(z_parameter > 0.00001){
+	 case 'S':
+	 
+	 	if(z_parameter > 0.00001  && end_of_game == 0){
 			if (!animation_ongoing) {
 				
 				check = obstacle_check('s');
@@ -73,8 +77,9 @@ void on_keyboard(unsigned char key, int x, int y)
 		glutPostRedisplay();
 		break;
 	case 'd':
+	case 'D':
 	
-			if (!animation_ongoing) {
+			if (!animation_ongoing && end_of_game == 0) {
 	
 				check = obstacle_check('d');
 		        animation_ongoing = 1;
@@ -90,7 +95,9 @@ void on_keyboard(unsigned char key, int x, int y)
 		glutPostRedisplay();
 		break;
 	case 'a':
-			if (!animation_ongoing) {
+	case 'A':
+	
+			if (!animation_ongoing  && end_of_game == 0) {
 				
 				check = obstacle_check('a');
 		        animation_ongoing = 1;
@@ -105,21 +112,21 @@ void on_keyboard(unsigned char key, int x, int y)
 		    }
 		glutPostRedisplay();
 		break;
-	case 't':
-		glutPostRedisplay();
-		break;
-	case 'r':
+	case 32:
+	
 		z_parameter = 1.5;
 		x_parameter = 0;
-		start_of_program = 0;
+		start_of_game = 0;
 		animation_par = 0;
 		scale_par = 0;
 		translate_par = 0;
 		sink_par = 0;
+		check = 0;
 		count = 1;
 		count1 = 1; 
 		count_x = 5;	
 		z = 4.5;
+		end_of_game = 0;
 		for(i=0; i<150; i++){
 			for(j=0; j<9;j++){
 				obstacle[i][j] = 0.0;
@@ -133,7 +140,8 @@ void on_keyboard(unsigned char key, int x, int y)
 static void on_timer(int id)  /*kretanje karaktera i kamere napred-nazad*/
 {
 
-	if(id == 0 && animation_par >= 15 && check == 0){
+	if(id == 0 && animation_par >= 15 && check == 0
+	   && end_of_game == 0){
     	z_parameter += 0.075;
     }
     
@@ -210,6 +218,7 @@ static void on_timer_x(int id)  /*kretanje karaktera levo-desno*/
 }
 
 static void on_timer_car(int id){  /*kretanje automobila i ostrvca*/
+	
 	if(id == 0){
 		car_par += 0.1;
 		car_par1 += 0.08;
@@ -224,21 +233,20 @@ static void on_timer_car(int id){  /*kretanje automobila i ostrvca*/
 		car_par1 = -9;
 	}
 	
-	
 	glutPostRedisplay();
 
 }
 
 static void on_timer_sink(int id){ /*animacija utapanja*/
-	if(id == 0){
-		sink_par += 0.04;
+	if(id == 0 && fabs(sink_par-1) > 0.0001){
+		sink_par += 0.05;
 	}
 
 	if(fabs(sink_par-1) < 0.0001){
 		sink_par = 1;
-		printf("End of the game\n");
 	}
 	
+		
 	glutPostRedisplay();
 
 }
@@ -263,7 +271,7 @@ void on_display(void)
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     gluLookAt(
-            1.4, 7, 5-z_parameter,  
+            1.4, 7-par, 5-z_parameter,  
             -1.6, 0, -4-z_parameter,
             0, 1, 0
         );
@@ -274,31 +282,35 @@ void on_display(void)
     
     draw_break();
 	draw_break();
-    draw_break();
-	draw_break();
-	draw_break();
+	draw_break();	
 	
    	determine_obstacle_layout();
    	
+   	if(count > 1){ /*provera da li su karaktera udarila kola*/
    	
-   	if(count > 1){
-		if(obstacle[count-1][1] == 1 && fabs(car_par1-x_parameter) < 1){
-			/*on_keyboard('r', 0, 0);*/
-			printf("End of the game\n");
+		if(obstacle[count-1][1] == 1 && fabs(car_par1-x_parameter+0.4) < 1){
+			end_of_game = 1;
 		}
-		if(obstacle[count-1][1] == 2 && fabs(-car_par1-x_parameter) < 1){
-			/*on_keyboard('r', 0, 0);*/
-			printf("End of the game\n");
+		if(obstacle[count-1][1] == 2 && fabs(-car_par1-x_parameter-0.4) < 1){
+			end_of_game = 1;
 		}
-		if(obstacle[count-1][1] == 3 && fabs(car_par-x_parameter) < 1){
-			/*on_keyboard('r', 0, 0);*/
-			printf("End of the game\n");
+		if(obstacle[count-1][1] == 3 && fabs(car_par-x_parameter+0.4) < 1){
+			end_of_game = 1;
 		}
-		if(obstacle[count-1][1] == 4 && fabs(-car_par-x_parameter) < 1){
-			/*on_keyboard('r', 0, 0);*/
-			printf("End of the game\n");
+		if(obstacle[count-1][1] == 4 && fabs(-car_par-x_parameter-0.4) < 1){
+			end_of_game = 1;
 		}
+		if(end_of_game == 1)
+			game_over();
+		
 	}
+	
+	if(fabs(sink_par-1) < 0.0001){
+		sink_par = 1;
+		end_of_game = 1;
+		game_over();
+	}
+	
     draw_character();
 	
     glutSwapBuffers();
@@ -307,7 +319,7 @@ void on_display(void)
 void determine_obstacle_layout(){
 	int i;
     srand(time(NULL));    
-    if(start_of_program == 0){				/*pravljene nasumicnog niza na osvnovu*/
+    if(start_of_game == 0){				    /*pravljenje niza na osvnovu*/
     	for(i = 0; i < ROAD_LENGTH; i++){ 	/*koga ce se iscrtavati prepreke i*/
     		terrain[i] = rand()%3;			/*dodatne provere kako ne bi bilo*/
     		if(i > 2){					  	/*previse uzastopno istih prepreka*/
@@ -330,12 +342,14 @@ void determine_obstacle_layout(){
     			terrain[i-3] == 2 || terrain[i-4] == 2) && terrain[i] == 2)
     				terrain[i] = rand()%2;
     	}
+    	terrain[0] = 0;
+    	terrain[1] = 0;
     	terrain[ROAD_LENGTH-1] = 0;
     	
    	}
    	
-   	if(start_of_program < 2) 
-   		start_of_program++;
+   	if(start_of_game < 2) 
+   		start_of_game++;
     
     
     for(i = 0; i < ROAD_LENGTH; i++){		/*iscrtavanje prepreka*/
@@ -396,7 +410,7 @@ int obstacle_check(char c){
 
 void draw_road_d1(){ 
 
-	if(start_of_program == 1){
+	if(start_of_game == 1){
 		obstacle[-1*(int)(z/1.5)][1] = 1;
 	}
 
@@ -420,7 +434,7 @@ void draw_road_d1(){
 
 void draw_road_l1(int x, int y){
 
-	if(start_of_program == 1)
+	if(start_of_game == 1)
 		obstacle[-1*(int)(z/1.5)][1] = 2;
 
 	glPushMatrix();
@@ -444,7 +458,7 @@ void draw_road_l1(int x, int y){
 
 void draw_road_d2(){
 
-	if(start_of_program == 1)
+	if(start_of_game == 1)
 		obstacle[-1*(int)(z/1.5)][1] = 3;
 
 	glPushMatrix();
@@ -467,7 +481,7 @@ void draw_road_d2(){
 
 void draw_road_l2(int x, int y){
 
-	if(start_of_program == 1)
+	if(start_of_game == 1)
 		obstacle[-1*(int)(z/1.5)][1] = 4;
 
 	glPushMatrix();
@@ -493,7 +507,7 @@ void draw_road_l2(int x, int y){
 void draw_break(){
 	srand(z);
 	
-	glPushMatrix();
+	glPushMatrix(); /*trava*/
 		glColor3f (0.2, 0.6, 0.2);
 		glTranslatef(0, 0.1, z);
 		glScalef(30, 0.2, 1.5);
@@ -511,18 +525,18 @@ void draw_break(){
 				glTranslatef(array[i], 0.6, z);
 				int r = rand()%3;
 				if(r == 1){
-					if(start_of_program == 1 && (int)z <= 0)
+					if(start_of_game == 1 && (int)z <= 0)
 						obstacle[-1*(int)(z/1.5)][i] = array[i];   
 					draw_tree_1();
 				}
 				else if(r == 2){
-					if(start_of_program == 1 && (int)z <= 0)
+					if(start_of_game == 1 && (int)z <= 0)
 						obstacle[-1*(int)(z/1.5)][i] = array[i];   
 
 					draw_tree_2();
 				}
 				else{
-					if(start_of_program == 1 && (int)z <= 0)
+					if(start_of_game == 1 && (int)z <= 0)
 						obstacle[-1*(int)(z/1.5)][i] = array[i];
 					glScalef(0.8, 0.7, 0.8);	
 					draw_stone();
@@ -538,7 +552,7 @@ void draw_break(){
 }
 
 void draw_water(){
-	if(start_of_program == 1){
+	if(start_of_game == 1){
 		obstacle[-1*(int)(z/1.5)][0] = 2;
 	}
 	glPushMatrix(); /*voda*/
@@ -553,6 +567,7 @@ void draw_water(){
 		glTranslatef(-3.5*sin(island_par), 0.1, z);
 		glScalef(3, 0.2, 0.75);
 		glutSolidCube(1);
+		
 	glPopMatrix();
 
 	z -= 1.5;
@@ -563,22 +578,24 @@ void draw_character(){
 
 	glPushMatrix();
 	if(obstacle[count1-1][0] == 2 
-		&& (x_parameter >= -3.5*sin(island_par)-1
-	    && x_parameter <= -3.5*sin(island_par)+1)){
-	    
-		/*x_parameter = -3.5*sin(island_par);*/    
+		&& (x_parameter >= -3.5*sin(island_par)-1.8
+	    && x_parameter <= -3.5*sin(island_par)+1.8) && sink_par == 0){ 
+	    											  /*provera da li je*/
+	    											  /*karakter skocio na*/
+		/*x_parameter = -3.5*sin(island_par);*/       /*ostrvce ili u vodu*/
 		if(rotation_parameter == 1)
 			on_keyboard('w', 0, 0);
 		else if(rotation_parameter == 3)
 			on_keyboard('s', 0, 0);
 	}
 	else if(obstacle[count1-1][0] == 2
-		&& (x_parameter < -3.5*sin(island_par)-1
-		|| x_parameter > -3.5*sin(island_par)+1)){
+		&& ((x_parameter < -3.5*sin(island_par)-1.8
+		|| x_parameter > -3.5*sin(island_par)+1.8) || (fabs(sink_par-0) > 0.0001))){
+		
 		
 		glutTimerFunc(TIMER_INTERVAL, on_timer_sink, 0);
 		glTranslatef(0, -sink_par, 0);
-		
+	
 	}
 	
 	glTranslatef(0,0+sin(PI*translate_par/30),0);
@@ -1040,6 +1057,68 @@ void draw_car(int road){
 		glutSolidCube(1);
 	glPopMatrix();
 
+}
+
+void game_over(){ /*ispisivanje teksta pri kraju igrice*/
+
+	glPushMatrix();
+		glColor4f(0, 0, 0, 0.5);
+		glTranslatef(0, 2, -z_parameter);
+		glScalef(30, 0.3, 30);
+	 	glutSolidCube(1);
+	glPopMatrix();
+
+	glMatrixMode( GL_PROJECTION );
+	glPushMatrix();
+	glLoadIdentity();
+	glMatrixMode( GL_MODELVIEW );
+
+	glLoadIdentity();
+
+	glDisable( GL_DEPTH_TEST ); 
+	  
+	int len, i;
+	char buf[300];
+	glColor4f( 1, 0, 0, 1 );
+	glRasterPos3f(-1, -0.1, 0);
+	sprintf( buf, ".");  
+	len = (int)strlen(buf);
+	  
+	for (i = 0; i < len; i++) {
+		glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, buf[i]);
+	}
+	
+	glColor4f( 1, 1, 1, 1 );
+	glRasterPos3f(-0.15, 0, 0);
+	sprintf( buf, "GAME OVER");  
+	len = (int)strlen(buf);
+	  
+	for (i = 0; i < len; i++) {
+		glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, buf[i]);
+	}
+	  
+	glColor4f( 1, 1, 1, 1 );
+	glRasterPos3f(-0.13, -0.1, 0);
+	sprintf( buf, "Your score: %d", count-1);  
+	len = (int)strlen(buf);
+	  
+	for (i = 0; i < len; i++) {
+		glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, buf[i]);
+	}
+	  
+	glColor4f( 1, 1, 1, 1 );
+	glRasterPos3f(-0.4, -0.2, 0);
+	sprintf( buf, "Press SPACE to start new game!");  
+	len = (int)strlen(buf);
+	  
+	for (i = 0; i < len; i++) {
+		glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, buf[i]);
+	}
+	 
+	glEnable( GL_DEPTH_TEST );
+	 
+	glPopMatrix();
+	
 }
 
 

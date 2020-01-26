@@ -8,6 +8,8 @@
 #include <math.h>
 #include <unistd.h>
 
+#include <string.h>
+
 void on_reshape(int width, int height); 
 void on_display(void);
 void on_keyboard(unsigned char key, int x, int y);
@@ -29,6 +31,6 @@ void draw_tree_1();
 void draw_tree_2();
 void draw_stone();
 void draw_car(int road);
-
+void game_over();
 
 #endif
