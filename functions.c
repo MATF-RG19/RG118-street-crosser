@@ -120,6 +120,11 @@ void on_keyboard(unsigned char key, int x, int y)
 		count1 = 1; 
 		count_x = 5;	
 		z = 4.5;
+		for(i=0; i<150; i++){
+			for(j=0; j<9;j++){
+				obstacle[i][j] = 0.0;
+			}
+		}
 		glutPostRedisplay();
 		break;
 	}    
