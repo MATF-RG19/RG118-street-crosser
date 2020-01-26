@@ -6,7 +6,7 @@
 
 static int window_width = 0;
 static int window_height = 0;
-double z_parameter = 0;			/*kretanje karaktera i kamere unapred*/
+double z_parameter = 1.5;			/*kretanje karaktera i kamere unapred*/
 double x_parameter = 0;			/*kretanje karaktera levo-desno*/
 double translate_par = 0;		/*animacija skoka*/
 int scale_par = 0;				/*animacija skoka*/
@@ -14,26 +14,24 @@ double rotation_parameter = 0;	/*animacija rotacije karaktera*/
 double curr_rotation = 2;		/*animacija rotacije karaktera*/
 double car_par = -10;			/*kretanje automobila vecom brzinom*/
 double car_par1 = 8;			/*kretanje automobila sa manjom brzinom*/
-double sink_par = 0;			
+double sink_par = 0;			/*animacija utapanja*/
 double z = 4.5;					/*za iscrtavanje prepreka i odmaralista*/
 int start_of_program = 0;		/*provera da li je prvo pokretanje programa*/			
 int animation_par = 0;			/*glavni parametar skoka i pomeraja karaktera*/
 int animation_ongoing = 0;		/*provera da li je animacija u toku*/
 double island_par = 0;			/*animacija kretanja ostrvca na vodi*/
-double obstacle[ROAD_LENGTH+50][9];
+int check = 0;					/*za proveru postojanja prepreke*/
+int count = 1;					/*brojac koliko je karakter otisao unapred*/
+int count1 = 1;					/*kao count samo se uvecava po zavrsetku animacije 
+								  zbog provere da li je karakter skocio u vodu*/
+int count_x = 5;				/*brojac koliko je karakter otisao levo-desno*/
+double obstacle[150][9];		/*sadrzi raspored drveca i kamenja*/
 int terrain[ROAD_LENGTH];		/*niz koji sadrzi raspored puteva, vode, 	
 								  odmaralista*/
-int check = 0;
-int count = 0;
-int count1 = 0;
-int count_x = 5;
-double saved_x_parameter = 0;
-int diff = 0;
-int k = 0;
 
 void on_keyboard(unsigned char key, int x, int y)
 {
-
+	int i,j;
     switch (key) {
     case 27:
         exit(0);
@@ -49,18 +47,8 @@ void on_keyboard(unsigned char key, int x, int y)
 				scale_par = 0;
 				translate_par = 0;
 				rotation_parameter = 1;
-				diff = 0;
-				if(count != 0 && terrain[count-1] == 2){
-					saved_x_parameter = x_parameter;
-				}
 				if(check == 0)
 					count++;
-				/*if(count > 2 && terrain[count-3] == 2){
-					if(saved_x_parameter > x_parameter)
-        				diff = (int)(-1*(saved_x_parameter - x_parameter));
-    				else
-       					diff = (int)(x_parameter - saved_x_parameter);
-				}*/
 				glutTimerFunc(TIMER_INTERVAL, on_timer, 0);
 			   	
 			}	
@@ -68,8 +56,7 @@ void on_keyboard(unsigned char key, int x, int y)
         glutPostRedisplay();
 		break;
 	 case 's':
-	 	
-	 	if(z_parameter > -0.01){
+	 	if(z_parameter > 0.00001){
 			if (!animation_ongoing) {
 				
 				check = obstacle_check('s');
@@ -122,23 +109,23 @@ void on_keyboard(unsigned char key, int x, int y)
 		glutPostRedisplay();
 		break;
 	case 'r':
-		z_parameter = 0;
+		z_parameter = 1.5;
 		x_parameter = 0;
 		start_of_program = 0;
 		animation_par = 0;
 		scale_par = 0;
 		translate_par = 0;
 		sink_par = 0;
-		count = 0;
-		count1 = 0; 
-		count_x = 0;	
+		count = 1;
+		count1 = 1; 
+		count_x = 5;	
 		z = 4.5;
 		glutPostRedisplay();
 		break;
 	}    
 }
 
-static void on_timer(int id)
+static void on_timer(int id)  /*kretanje karaktera i kamere napred-nazad*/
 {
 
 	if(id == 0 && animation_par >= 15 && check == 0){
@@ -169,7 +156,6 @@ static void on_timer(int id)
 			count1++;
 		else if(id == 1 && check == 0)
 			count1--;
-		/*count_x += diff;*/
 	}
 
     glutPostRedisplay();
@@ -180,11 +166,11 @@ static void on_timer(int id)
     
 }
 
-static void on_timer_x(int id)
+static void on_timer_x(int id)  /*kretanje karaktera levo-desno*/
 {
     
-    if(id == 0 && animation_par >= 15 && x_parameter < 4.5
-       && check == 0){
+    if(id == 0 && animation_par >= 15 && x_parameter < 4.5001
+       && check == 0 ){
     	x_parameter += 0.075;
     }
     
@@ -218,7 +204,7 @@ static void on_timer_x(int id)
     }
 }
 
-static void on_timer_car(int id){
+static void on_timer_car(int id){  /*kretanje automobila i ostrvca*/
 	if(id == 0){
 		car_par += 0.1;
 		car_par1 += 0.08;
@@ -233,11 +219,12 @@ static void on_timer_car(int id){
 		car_par1 = -9;
 	}
 	
+	
 	glutPostRedisplay();
 
 }
 
-static void on_timer_sink(int id){
+static void on_timer_sink(int id){ /*animacija utapanja*/
 	if(id == 0){
 		sink_par += 0.04;
 	}
@@ -284,9 +271,29 @@ void on_display(void)
 	draw_break();
     draw_break();
 	draw_break();
+	draw_break();
 	
    	determine_obstacle_layout();
    	
+   	
+   	if(count > 1){
+		if(obstacle[count-1][1] == 1 && fabs(car_par1-x_parameter) < 1){
+			/*on_keyboard('r', 0, 0);*/
+			printf("End of the game\n");
+		}
+		if(obstacle[count-1][1] == 2 && fabs(-car_par1-x_parameter) < 1){
+			/*on_keyboard('r', 0, 0);*/
+			printf("End of the game\n");
+		}
+		if(obstacle[count-1][1] == 3 && fabs(car_par-x_parameter) < 1){
+			/*on_keyboard('r', 0, 0);*/
+			printf("End of the game\n");
+		}
+		if(obstacle[count-1][1] == 4 && fabs(-car_par-x_parameter) < 1){
+			/*on_keyboard('r', 0, 0);*/
+			printf("End of the game\n");
+		}
+	}
     draw_character();
 	
     glutSwapBuffers();
@@ -331,16 +338,20 @@ void determine_obstacle_layout(){
     		draw_break();					/*prethodno generisanog niza*/
     	else if(terrain[i] == 1){
     		if(i%2 == 1){
-    			if(i%4==1)
-    				draw_road_d1();
-    			else
+    			if(i%4==1){					/*dodatna podela puteva kako*/
+    				draw_road_d1();			/*bih mogao da imam razlicite*/
+    			}							/*boje automobila i brzine*/
+    			else{						/*kretanja*/
     				draw_road_d2();
+    			}
     		}
     		else{
-    			if(i%4==0)
+    			if(i%4==0){
     				draw_road_l1(terrain[i-1], terrain[i+1]);
-    			else
-    				draw_road_l2(terrain[i-1], terrain[i+1]);
+    			}
+    			else{
+    				draw_road_l2(terrain[i-1], terrain[i+1]);	
+    			}
     			
     		}	
     	}
@@ -352,11 +363,12 @@ void determine_obstacle_layout(){
 int obstacle_check(char c){
     	
    	check = 0;
-   	for(k = 2; k < 9; k++){
-   		if((int)x_parameter == (int)obstacle[count][k] 
-   			&& (int)x_parameter != 0 && c == 'w'){
-   			check = 1;
-    	}
+   	int k = 0;
+   	for(k = 2; k < 9; k++){								/*u zavisnosti od toga u*/
+   		if((int)x_parameter == (int)obstacle[count][k] 	/*kom smeru igrac pokusava*/
+   			&& (int)x_parameter != 0 && c == 'w'){		/*da pomeri karaktera*/
+   			check = 1;									/*proveravam da li se*/
+    	}												/*tu nalazi neka prepreka*/
     	if((int)x_parameter == (int)obstacle[count-2][k] 
    			&& (int)x_parameter != 0 && c == 's'){
    			check = 1;
@@ -379,6 +391,10 @@ int obstacle_check(char c){
 
 void draw_road_d1(){ 
 
+	if(start_of_program == 1){
+		obstacle[-1*(int)(z/1.5)][1] = 1;
+	}
+
 	glPushMatrix(); /*put*/
 		glColor3f (0.2, 0.2, 0.2);
 		glTranslatef(0, 0, z);
@@ -398,6 +414,9 @@ void draw_road_d1(){
 }
 
 void draw_road_l1(int x, int y){
+
+	if(start_of_program == 1)
+		obstacle[-1*(int)(z/1.5)][1] = 2;
 
 	glPushMatrix();
 		if(x != 1 && x == y)
@@ -420,6 +439,9 @@ void draw_road_l1(int x, int y){
 
 void draw_road_d2(){
 
+	if(start_of_program == 1)
+		obstacle[-1*(int)(z/1.5)][1] = 3;
+
 	glPushMatrix();
 		glColor3f (0.2, 0.2, 0.2);
 		glTranslatef(0, 0, z);
@@ -439,6 +461,9 @@ void draw_road_d2(){
 }
 
 void draw_road_l2(int x, int y){
+
+	if(start_of_program == 1)
+		obstacle[-1*(int)(z/1.5)][1] = 4;
 
 	glPushMatrix();
 		if(x != 1 && x == y)
@@ -536,7 +561,7 @@ void draw_character(){
 		&& (x_parameter >= -3.5*sin(island_par)-1
 	    && x_parameter <= -3.5*sin(island_par)+1)){
 	    
-		/*x_parameter = -3.5*sin(island_par);*/
+		/*x_parameter = -3.5*sin(island_par);*/    
 		if(rotation_parameter == 1)
 			on_keyboard('w', 0, 0);
 		else if(rotation_parameter == 3)
@@ -545,7 +570,7 @@ void draw_character(){
 	else if(obstacle[count1-1][0] == 2
 		&& (x_parameter < -3.5*sin(island_par)-1
 		|| x_parameter > -3.5*sin(island_par)+1)){
-		/*on_keyboard('r', 0, 0);*/
+		
 		glutTimerFunc(TIMER_INTERVAL, on_timer_sink, 0);
 		glTranslatef(0, -sink_par, 0);
 		
@@ -555,57 +580,58 @@ void draw_character(){
     glTranslatef(0+x_parameter,0.8-0.35*sin(PI*scale_par/35),1.5-z_parameter);
     
  			
-    		if(rotation_parameter != curr_rotation){
-    		
-    			if(curr_rotation == 1)
-    				glRotatef(90, 0, 1, 0);
-    			if(curr_rotation == 3)
-    				glRotatef(-90, 0, 1, 0);
-    			if(curr_rotation == 4)
-    				glRotatef(180, 0, 1, 0);
-    			if((rotation_parameter == 1 && curr_rotation == 4) || 
-    			   (rotation_parameter == 4 && curr_rotation == 3) ||
-    			   (rotation_parameter == 3 && curr_rotation == 2) || 
-    			   (rotation_parameter == 2 && curr_rotation == 1)){
+    if(rotation_parameter != curr_rotation){		/*rotiranje karaktera*/
+    												/*morao sam da pamtim*/
+   		if(curr_rotation == 1)						/*koja mu je prethodna rotacija*/
+   			glRotatef(90, 0, 1, 0);					/*bila da bih znao kako da*/
+ 		if(curr_rotation == 3)						/*ga pravilno zarotiram*/
+ 			glRotatef(-90, 0, 1, 0);
+    	if(curr_rotation == 4)
+    		glRotatef(180, 0, 1, 0);
+    	if((rotation_parameter == 1 && curr_rotation == 4) || 
+   		   (rotation_parameter == 4 && curr_rotation == 3) ||
+  		   (rotation_parameter == 3 && curr_rotation == 2) || 
+    	   (rotation_parameter == 2 && curr_rotation == 1)){
     			   
-    			    glRotatef(-90*animation_par/35, 0, 1, 0);
-    			    
+  			    glRotatef(-90*animation_par/35, 0, 1, 0);
+    			       			   	
+   		}
+    	if((rotation_parameter == 1 && curr_rotation == 3) ||
+    	   (rotation_parameter == 4 && curr_rotation == 2) || 
+   		   (rotation_parameter == 3 && curr_rotation == 1)){
     			   	
-    			}
-    			if((rotation_parameter == 1 && curr_rotation == 3) ||
-    			   (rotation_parameter == 4 && curr_rotation == 2) || 
-    			   (rotation_parameter == 3 && curr_rotation == 1)){
-    			   	
-    			    glRotatef(180*animation_par/35, 0, 1, 0);
-    			    
-					
-    			}
+  			    glRotatef(180*animation_par/35, 0, 1, 0);
+    			    			
+   		}
     			
-    			if(rotation_parameter == 2 && curr_rotation == 4){
-    				glRotatef(-180*animation_par/35, 0, 1, 0);
-    			}
+    	if(rotation_parameter == 2 && curr_rotation == 4){
+    	
+    			glRotatef(-180*animation_par/35, 0, 1, 0);
     			
-    			if((rotation_parameter == 3 && curr_rotation == 4) || 
-    			   (rotation_parameter == 2 && curr_rotation == 3) ||
-    			   (rotation_parameter == 1 && curr_rotation == 2) || 
-    			   (rotation_parameter == 4 && curr_rotation == 1)){
+   		}
+    			
+    	if((rotation_parameter == 3 && curr_rotation == 4) || 
+    	   (rotation_parameter == 2 && curr_rotation == 3) ||
+    	   (rotation_parameter == 1 && curr_rotation == 2) || 
+   		   (rotation_parameter == 4 && curr_rotation == 1)){
     			   	
-    			   	glRotatef(90*animation_par/35, 0, 1, 0);
+   			   	glRotatef(90*animation_par/35, 0, 1, 0);
     			   	
-    			}
-    		}
+    	}
+    }
 
-		else{
+	else{
 		
-			if(curr_rotation == 1)
-    				glRotatef(90, 0, 1, 0);
-    		if(curr_rotation == 3)
-    				glRotatef(-90, 0, 1, 0);
-    		if(curr_rotation == 4)
-    				glRotatef(180	, 0, 1, 0);
+		if(curr_rotation == 1)
+    			glRotatef(90, 0, 1, 0);
+   		if(curr_rotation == 3)
+   				glRotatef(-90, 0, 1, 0);
+   		if(curr_rotation == 4)
+   				glRotatef(180	, 0, 1, 0);
 		
-		}
-    	glScalef(0.7, 0.7-0.35*sin(PI*scale_par/35), 0.75+0.15*sin(PI*scale_par/35));
+	}
+    	
+    glScalef(0.7, 0.7-0.35*sin(PI*scale_par/35), 0.75+0.15*sin(PI*scale_par/35));
 
 	glPushMatrix(); /*telo*/
 		glColor3f(0,0,0);
@@ -759,9 +785,39 @@ void draw_leg(){
 void draw_tree_1(){
 
 	glPushMatrix();
+    	glColor3f(0.29, 0.38, 0.18);
+		glTranslatef(0, 0.5-0.2 + 0.19 - 0.475, 0);
+		glScalef(1 - 0.26, 0.19, 1 - 0.26); 
+    	glutSolidCube(1);
+  	glPopMatrix();
+  	glPushMatrix();
     	glColor3f(0.32, 0.44, 0.21);
-		glTranslatef(0, 0.5-0.2 + 0.19, 0);
-		glScalef(1 - 0.26, 1 - 0.4 + 0.37, 1 - 0.26); 
+		glTranslatef(0, 0.5-0.2 + 0.38 - 0.475, 0);
+		glScalef(1 - 0.26, 0.19, 1 - 0.26); 
+    	glutSolidCube(1);
+  	glPopMatrix();
+  	glPushMatrix();
+    	glColor3f(0.29, 0.38, 0.18);
+		glTranslatef(0, 0.5-0.2 + 0.57 - 0.475, 0);
+		glScalef(1 - 0.26, 0.19, 1 - 0.26); 
+    	glutSolidCube(1);
+  	glPopMatrix();
+  	glPushMatrix();
+    	glColor3f(0.32, 0.44, 0.21);
+		glTranslatef(0, 0.5-0.2 + 0.76 - 0.475, 0);
+		glScalef(1 - 0.26, 0.19, 1 - 0.26); 
+    	glutSolidCube(1);
+  	glPopMatrix();
+  	glPushMatrix();
+    	glColor3f(0.29, 0.38, 0.18);
+		glTranslatef(0, 0.5-0.2 + 0.95 - 0.475, 0);
+		glScalef(1 - 0.26, 0.19, 1 - 0.26); 
+    	glutSolidCube(1);
+  	glPopMatrix();
+  	glPushMatrix();
+    	glColor3f(0.32, 0.44, 0.21);
+		glTranslatef(0, 0.5-0.2 + 1.14 - 0.475, 0);
+		glScalef(1 - 0.26, 0.19, 1 - 0.26); 
     	glutSolidCube(1);
   	glPopMatrix();
   	glPushMatrix();
@@ -962,8 +1018,6 @@ void draw_car(int road){
 		
 		glutSolidCube(1);
 	glPopMatrix();
-	
-	
 	
 	glPushMatrix();
 		glColor3f(0.8,0.0,0.0);
