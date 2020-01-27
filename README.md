@@ -25,5 +25,5 @@ ___
 ### :book: Neophodne biblioteke za pokretanje:
 - Biblioteka: `<GL/glut.h>` 
 
-![Street_crosser](https://github.com/MATF-RG19/RG118-street-crosser/blob/master/Screenshots/5.gif)
+
 
