@@ -2,7 +2,7 @@ PROGRAM = street_crosser
 CC      = gcc
 CFLAGS  = -g -Wall
 LDFLAGS = -lGL -lGLU -lglut -lm
-OBJFILES  = main.o functions.o
+OBJFILES  = main.o functions.o gameover.o
 
 all: $(PROGRAM)
 

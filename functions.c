@@ -1,4 +1,5 @@
 #include "functions.h"
+#include "gameover.h"
 
 #define ROAD_LENGTH 100
 #define TIMER_INTERVAL 1
@@ -137,7 +138,7 @@ void on_keyboard(unsigned char key, int x, int y)
 	}    
 }
 
-static void on_timer(int id)  /*kretanje karaktera i kamere napred-nazad*/
+void on_timer(int id)  /*kretanje karaktera i kamere napred-nazad*/
 {
 
 	if(id == 0 && animation_par >= 15 && check == 0
@@ -179,7 +180,7 @@ static void on_timer(int id)  /*kretanje karaktera i kamere napred-nazad*/
     
 }
 
-static void on_timer_x(int id)  /*kretanje karaktera levo-desno*/
+void on_timer_x(int id)  /*kretanje karaktera levo-desno*/
 {
     
     if(id == 0 && animation_par >= 15 && x_parameter < 4.5001
@@ -217,7 +218,7 @@ static void on_timer_x(int id)  /*kretanje karaktera levo-desno*/
     }
 }
 
-static void on_timer_car(int id){  /*kretanje automobila i ostrvca*/
+void on_timer_car(int id){  /*kretanje automobila i ostrvca*/
 	
 	if(id == 0){
 		car_par += 0.1;
@@ -237,7 +238,7 @@ static void on_timer_car(int id){  /*kretanje automobila i ostrvca*/
 
 }
 
-static void on_timer_sink(int id){ /*animacija utapanja*/
+void on_timer_sink(int id){ /*animacija utapanja*/
 	if(id == 0 && fabs(sink_par-1) > 0.0001){
 		sink_par += 0.05;
 	}
@@ -576,10 +577,12 @@ void draw_water(){
 
 void draw_character(){
 
+
+
 	glPushMatrix();
 	if(obstacle[count1-1][0] == 2 
 		&& (x_parameter >= -3.5*sin(island_par)-1.8
-	    && x_parameter <= -3.5*sin(island_par)+1.8) && sink_par == 0){ 
+	    && x_parameter <= -3.5*sin(island_par)+1.8) ){ 
 	    											  /*provera da li je*/
 	    											  /*karakter skocio na*/
 		/*x_parameter = -3.5*sin(island_par);*/       /*ostrvce ili u vodu*/
@@ -1057,68 +1060,6 @@ void draw_car(int road){
 		glutSolidCube(1);
 	glPopMatrix();
 
-}
-
-void game_over(){ /*ispisivanje teksta pri kraju igrice*/
-
-	glPushMatrix();
-		glColor4f(0, 0, 0, 0.5);
-		glTranslatef(0, 2, -z_parameter);
-		glScalef(30, 0.3, 30);
-	 	glutSolidCube(1);
-	glPopMatrix();
-
-	glMatrixMode( GL_PROJECTION );
-	glPushMatrix();
-	glLoadIdentity();
-	glMatrixMode( GL_MODELVIEW );
-
-	glLoadIdentity();
-
-	glDisable( GL_DEPTH_TEST ); 
-	  
-	int len, i;
-	char buf[300];
-	glColor4f( 1, 0, 0, 1 );
-	glRasterPos3f(-1, -0.1, 0);
-	sprintf( buf, ".");  
-	len = (int)strlen(buf);
-	  
-	for (i = 0; i < len; i++) {
-		glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, buf[i]);
-	}
-	
-	glColor4f( 1, 1, 1, 1 );
-	glRasterPos3f(-0.15, 0, 0);
-	sprintf( buf, "GAME OVER");  
-	len = (int)strlen(buf);
-	  
-	for (i = 0; i < len; i++) {
-		glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, buf[i]);
-	}
-	  
-	glColor4f( 1, 1, 1, 1 );
-	glRasterPos3f(-0.13, -0.1, 0);
-	sprintf( buf, "Your score: %d", count-1);  
-	len = (int)strlen(buf);
-	  
-	for (i = 0; i < len; i++) {
-		glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, buf[i]);
-	}
-	  
-	glColor4f( 1, 1, 1, 1 );
-	glRasterPos3f(-0.4, -0.2, 0);
-	sprintf( buf, "Press SPACE to start new game!");  
-	len = (int)strlen(buf);
-	  
-	for (i = 0; i < len; i++) {
-		glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, buf[i]);
-	}
-	 
-	glEnable( GL_DEPTH_TEST );
-	 
-	glPopMatrix();
-	
 }
 
 
