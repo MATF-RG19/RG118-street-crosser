@@ -19,7 +19,7 @@ ___
 * Preuzmite folder pomoću komande: :link: ``` git clone https://github.com/MATF-RG19/RG118-street-crosser ``` <br>
 * Pozicionirajte se u direktorijum `/RG118-street-crosser/` <br>
 * Pokrenite Makefile komandom `make` <br>
-- Pokrenite igricu komandom `./street_crosser` 
+* Pokrenite igricu komandom `./street_crosser` 
 ___
 
 ### :book: Neophodne biblioteke za pokretanje:
