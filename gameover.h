@@ -5,6 +5,6 @@
 #include <stdio.h>
 #include <string.h>
 
-void game_over();
+void game_over(void);
 
 #endif

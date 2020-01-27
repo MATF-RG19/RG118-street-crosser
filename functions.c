@@ -30,7 +30,8 @@ int end_of_game = 0;			/*signal za kraj igrice*/
 double obstacle[150][9];		/*sadrzi raspored drveca i kamenja*/
 int terrain[ROAD_LENGTH];		/*niz koji sadrzi raspored puteva, vode, 	
 								  odmaralista*/
-double par = 0;
+int half_jump = 0;
+
 void on_keyboard(unsigned char key, int x, int y)
 {
 	int i,j;
@@ -50,6 +51,7 @@ void on_keyboard(unsigned char key, int x, int y)
 				scale_par = 0;
 				translate_par = 0;
 				rotation_parameter = 1;
+				half_jump = 0;
 				if(check == 0)
 					count++;
 				glutTimerFunc(TIMER_INTERVAL, on_timer, 0);
@@ -70,6 +72,7 @@ void on_keyboard(unsigned char key, int x, int y)
 		        scale_par = 0;
 		        translate_par = 0;
 		        rotation_parameter = 3;
+		        half_jump = 0;
 		        if(check == 0)
 					count--;
 		        glutTimerFunc(TIMER_INTERVAL, on_timer, 1);
@@ -170,6 +173,11 @@ void on_timer(int id)  /*kretanje karaktera i kamere napred-nazad*/
 			count1++;
 		else if(id == 1 && check == 0)
 			count1--;
+		half_jump = 0;
+	}
+	
+	if(animation_par == 20){
+		half_jump = 1;
 	}
 
     glutPostRedisplay();
@@ -272,7 +280,7 @@ void on_display(void)
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     gluLookAt(
-            1.4, 7-par, 5-z_parameter,  
+            1.4, 7, 5-z_parameter,  
             -1.6, 0, -4-z_parameter,
             0, 1, 0
         );
@@ -289,16 +297,20 @@ void on_display(void)
    	
    	if(count > 1){ /*provera da li su karaktera udarila kola*/
    	
-		if(obstacle[count-1][1] == 1 && fabs(car_par1-x_parameter+0.4) < 1){
+		if((obstacle[count-1][1] == 1 || obstacle[count1-1][1] == 1)
+		   && half_jump == 0 && fabs(car_par1-x_parameter+0.4) < 1){
 			end_of_game = 1;
 		}
-		if(obstacle[count-1][1] == 2 && fabs(-car_par1-x_parameter-0.4) < 1){
+		if((obstacle[count-1][1] == 2 || obstacle[count1-1][1] == 2) 
+		   && half_jump == 0 && fabs(-car_par1-x_parameter-0.4) < 1){
 			end_of_game = 1;
 		}
-		if(obstacle[count-1][1] == 3 && fabs(car_par-x_parameter+0.4) < 1){
+		if((obstacle[count-1][1] == 3 || obstacle[count1-1][1] == 3)
+		   && half_jump == 0 && fabs(car_par-x_parameter+0.4) < 1){
 			end_of_game = 1;
 		}
-		if(obstacle[count-1][1] == 4 && fabs(-car_par-x_parameter-0.4) < 1){
+		if((obstacle[count-1][1] == 4 || obstacle[count1-1][1] == 4)
+		   && half_jump == 0 && fabs(-car_par-x_parameter-0.4) < 1){
 			end_of_game = 1;
 		}
 		if(end_of_game == 1)
