@@ -1,4 +1,4 @@
-# :car: _Street crosser_
+# :blue_car: _Street crosser_
 ___
 
 ### :memo: Opis igrice:
