@@ -2,7 +2,6 @@
 #include "gameover.h"
 
 #define ROAD_LENGTH 100
-#define TIMER_INTERVAL 1
 #define PI 3.1415926535897
 
 static int window_width = 0;
@@ -242,8 +241,9 @@ void on_timer_car(int id){  /*kretanje automobila i ostrvca*/
 		car_par1 = -9;
 	}
 	
+	
+	glutTimerFunc(TIMER_INTERVAL, on_timer_car, 0); 
 	glutPostRedisplay();
-
 }
 
 void on_timer_sink(int id){ /*animacija utapanja*/
@@ -284,8 +284,6 @@ void on_display(void)
             -1.6, 0, -4-z_parameter,
             0, 1, 0
         );
-        
-    glutTimerFunc(TIMER_INTERVAL, on_timer_car, 0);
     
     z = 4.5;
     

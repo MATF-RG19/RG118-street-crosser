@@ -1,6 +1,8 @@
 #ifndef __FUNCTIONS_H__
 #define __FUNCTIONS_H__
 
+#define TIMER_INTERVAL 1
+
 #include <GL/glut.h>
 #include <stdlib.h>
 #include <stdio.h>

@@ -39,6 +39,8 @@ int main(int argc, char **argv)
     glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse);
 
     glEnable(GL_COLOR_MATERIAL);
+    
+    glutTimerFunc(TIMER_INTERVAL, on_timer_car, 0);
 
     glutMainLoop();
 
